@@ -8,11 +8,13 @@
 import numpy as np
 from pynput import keyboard
 from pynput.keyboard import Key
+import copy
 
 UP_COMMAND = 0
 DOWN_COMMAND = 1
 LEFT_COMMAND = 2
 RIGHT_COMMAND = 3
+VALID_MOVES = [UP_COMMAND, DOWN_COMMAND, LEFT_COMMAND, RIGHT_COMMAND]
 
 class Map:
     def __init__(self, layout, starting_pos, office_pos):
@@ -36,7 +38,7 @@ Complex_map = Map(Complex_layout, (0,0), (2,0))
 class Game:
 
     def __init__(self, map = Simple_map):
-        self.map = map
+        self.map = copy.deepcopy(map)
         self.has_coffee = False
         self.win = False
 
@@ -84,21 +86,3 @@ class Game:
             return
             
 
-game = Game(Complex_map)
-
-while not game.win:
-    game.display()
-    Command = input()
-    if Command == "w":
-        game.step(UP_COMMAND)
-    
-    if Command == "s":
-        game.step(DOWN_COMMAND)
-        
-    if Command == "a":
-        game.step(LEFT_COMMAND)
-        
-    if Command == "d":
-        game.step(RIGHT_COMMAND)
-
-game.display()
