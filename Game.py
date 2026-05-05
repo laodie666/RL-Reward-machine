@@ -35,6 +35,12 @@ Complex_layout =   np.array([["@", "*", "c"],
 
 Complex_map = Map(Complex_layout, (0,0), (2,0))
 
+More_Complicated_layout = np.array([["@", "#", "*", "*", "c"], 
+                                    ["*", "#", "*", "#", "#"],
+                                    ["*", "*", "*", "*", "o"]])
+
+More_Complicated_map = Map(More_Complicated_layout, (0,0), (2,4))
+
 class Game:
 
     def __init__(self, map = Simple_map):
@@ -46,6 +52,7 @@ class Game:
         for row in self.map.layout:
             print(row)
 
+    # return state, reward, done
     def step(self, dir):
         cur_pos = self.map.pos
         new_pos = list(self.map.pos)
@@ -64,16 +71,22 @@ class Game:
 
         if new_pos[0] < 0 or new_pos[0] >= self.map.H or new_pos[1] < 0 or new_pos[1] >= self.map.W:
             # Out of bound, nothing happens
-            return
+            return -10
         elif self.map.layout[new_pos] == "#":
             # Hit a wall, nothing happens
-            return
+            return -10
         else:
+            reward = 0
+            
             # Valid move
             if self.map.layout[new_pos] == "c":
                 self.has_coffee = True
-            if self.map.layout[new_pos] == "o" and self.has_coffee:
+                reward = 1
+            elif self.map.layout[new_pos] == "o" and self.has_coffee:
                 self.win = True
+                reward = 5
+            else:
+                reward = -0.01
 
             self.map.layout[cur_pos] = "*"
             if cur_pos == self.map.office_pos and self.has_coffee == False:
@@ -83,6 +96,6 @@ class Game:
             self.map.layout[new_pos] = "@"
             self.map.pos = new_pos
             
-            return
+            return reward
             
 
