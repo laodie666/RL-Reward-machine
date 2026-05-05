@@ -24,44 +24,46 @@ class Map:
         self.H = len(self.layout)
         self.W = len(self.layout[0])
 
-Simple_layout = np.array([["@", "c"], 
-                          ["#", "o"]])
+Simple_layout = np.array([["@", "c", "*"], 
+                          ["#", "m", "o"]])
 
-Simple_map = Map(Simple_layout, (0,0), (1,1))
+Simple_map = Map(Simple_layout, (0,0), (1,2))
 
 Complex_layout =   np.array([["@", "*", "c"], 
-                             ["*", "#", "*"],
+                             ["m", "#", "*"],
                              ["o", "*", "*"]])
 
 Complex_map = Map(Complex_layout, (0,0), (2,0))
 
 More_Complicated_layout = np.array([["@", "#", "*", "*", "c"], 
-                                    ["*", "#", "*", "#", "#"],
+                                    ["*", "#", "m", "#", "#"],
                                     ["*", "*", "*", "*", "o"]])
 
 More_Complicated_map = Map(More_Complicated_layout, (0,0), (2,4))
 
-Two_coffee_layout =       np.array([["@", "*", "*", "*", "*"], 
+Two_coffee_layout =       np.array([["@", "*", "*", "*", "m"], 
                                     ["*", "#", "o", "#", "*"],
                                     ["c", "*", "*", "*", "c"]])
 
 Two_coffee_map = Map(Two_coffee_layout, (0,0), (1,2))
 
 Maze_layout = np.array([
-    ["@", "*", "#", "*", "*", "*", "*", "c"],
-    ["*", "#", "#", "*", "#", "*", "#", "#"],
-    ["*", "*", "*", "*", "#", "*", "#", "#"],
-    ["*", "#", "#", "#", "#", "*", "#", "#"],
-    ["*", "*", "c", "#", "*", "*", "#", "#"],
-    ["#", "#", "*", "#", "o", "*", "#", "#"]
+    ["@", "*", "*", "#", "*", "*", "*", "*", "#"],
+    ["#", "#", "*", "#", "*", "#", "#", "*", "#"],
+    ["*", "*", "*", "#", "*", "*", "#", "*", "*"],
+    ["*", "#", "#", "#", "#", "*", "#", "#", "*"],
+    ["*", "*", "c", "*", "*", "*", "*", "#", "*"],
+    ["#", "*", "#", "#", "#", "#", "*", "#", "*"],
+    ["#", "*", "*", "*", "*", "m", "#", "o", "*"]
 ])
-Maze_map = Map(Maze_layout, starting_pos=(0,0), office_pos=(4,4))
+Maze_map = Map(Maze_layout, starting_pos=(0,0), office_pos=(6,7))
 
 class Game:
 
     def __init__(self, map = Simple_map):
         self.map = copy.deepcopy(map)
         self.has_coffee = False
+        self.has_mail = False
         self.win = False
 
     def display(self):
@@ -94,20 +96,25 @@ class Game:
         else:
             reward = 0
             
+            self.map.layout[cur_pos] = "*"
+            if cur_pos == self.map.office_pos and (self.has_coffee == False or self.has_mail == False):
+                # replace the office tile if coffee or mail not delivered. 
+                self.map.layout[cur_pos] = "o"
+
             # Valid move
             if self.map.layout[new_pos] == "c" and self.has_coffee == False:
                 self.has_coffee = True
                 reward = 1
-            elif self.map.layout[new_pos] == "o" and self.has_coffee:
+            elif self.map.layout[new_pos] == "m" and self.has_mail == False:
+                self.has_mail = True
+                reward = 1
+            elif self.map.layout[new_pos] == "o" and self.has_coffee and self.has_mail:
                 self.win = True
                 reward = 5
             else:
                 reward = -0.1
 
-            self.map.layout[cur_pos] = "*"
-            if cur_pos == self.map.office_pos and self.has_coffee == False:
-                # replace the office tile if coffee not delivered. 
-                self.map.layout[cur_pos] = "o"
+            
             
             self.map.layout[new_pos] = "@"
             self.map.pos = new_pos

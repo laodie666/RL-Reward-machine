@@ -64,7 +64,7 @@ class CrossProductQTablePlayer(Player):
 
     def get_q_value(self, game: Game.Game, action: int):
         # the game state can be represented by position of the player and whether they have coffee.
-        state = (game.map.pos, game.has_coffee)
+        state = (game.map.pos, game.has_coffee, game.has_mail)
         if (state, action) not in self.q_table:
             self.q_table[(state, action)] = 0
         
@@ -80,11 +80,12 @@ class CrossProductQTablePlayer(Player):
             action_q_pair = [(action, self.get_q_value(game, action)) for action in Game.VALID_MOVES]
             return max(action_q_pair, key = lambda x :x[1])[0]
         
-    def update_q_value(self, game, action, reward, next_game):
+    def update_q_value(self, game: Game.Game, action, reward, next_game):
+        
         best_future_q = max([self.get_q_value(next_game, action) for action in Game.VALID_MOVES])
         current_q = self.get_q_value(game, action)
         
-        state = (game.map.pos, game.has_coffee)
+        state = (game.map.pos, game.has_coffee, game.has_mail)
 
         self.q_table[(state, action)] = current_q + self.learning_rate * (reward + self.discount_factor * best_future_q - current_q)
 
@@ -100,7 +101,7 @@ class CRMQTablePlayer(Player):
 
     def get_q_value(self, game: Game.Game, action: int):
         # the game state can be represented by position of the player and whether they have coffee.
-        state = (game.map.pos, game.has_coffee)
+        state = (game.map.pos, game.has_coffee, game.has_mail)
         if (state, action) not in self.q_table:
             self.q_table[(state, action)] = 0
         
@@ -120,6 +121,6 @@ class CRMQTablePlayer(Player):
         best_future_q = max([self.get_q_value(next_game, action) for action in Game.VALID_MOVES])
         current_q = self.get_q_value(game, action)
         
-        state = (game.map.pos, game.has_coffee)
+        state = (game.map.pos, game.has_coffee, game.has_mail)
 
         self.q_table[(state, action)] = current_q + self.learning_rate * (reward + self.discount_factor * best_future_q - current_q)
