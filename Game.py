@@ -41,6 +41,22 @@ More_Complicated_layout = np.array([["@", "#", "*", "*", "c"],
 
 More_Complicated_map = Map(More_Complicated_layout, (0,0), (2,4))
 
+Two_coffee_layout =       np.array([["@", "*", "*", "*", "*"], 
+                                    ["*", "#", "o", "#", "*"],
+                                    ["c", "*", "*", "*", "c"]])
+
+Two_coffee_map = Map(Two_coffee_layout, (0,0), (1,2))
+
+Maze_layout = np.array([
+    ["@", "*", "#", "*", "*", "*", "*", "c"],
+    ["*", "#", "#", "*", "#", "*", "#", "#"],
+    ["*", "*", "*", "*", "#", "*", "#", "#"],
+    ["*", "#", "#", "#", "#", "*", "#", "#"],
+    ["*", "*", "c", "#", "*", "*", "#", "#"],
+    ["#", "#", "*", "#", "o", "*", "#", "#"]
+])
+Maze_map = Map(Maze_layout, starting_pos=(0,0), office_pos=(4,4))
+
 class Game:
 
     def __init__(self, map = Simple_map):
@@ -79,14 +95,14 @@ class Game:
             reward = 0
             
             # Valid move
-            if self.map.layout[new_pos] == "c":
+            if self.map.layout[new_pos] == "c" and self.has_coffee == False:
                 self.has_coffee = True
                 reward = 1
             elif self.map.layout[new_pos] == "o" and self.has_coffee:
                 self.win = True
                 reward = 5
             else:
-                reward = -0.01
+                reward = -0.1
 
             self.map.layout[cur_pos] = "*"
             if cur_pos == self.map.office_pos and self.has_coffee == False:

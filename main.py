@@ -2,37 +2,37 @@ import Game
 import Players
 import copy
 import time
+import matplotlib.pyplot as plt
 
-map = Game.More_Complicated_map
+map = Game.Maze_map
 
 ################### RANDOM PLAYER ####################
 
-# counts = []
+Random_counts = []
 
-# for episodes in range(10):
-#     step = 0
-#     game = Game.Game(map)
-#     Random_player = Players.RandomPlayer(game)
+for episodes in range(100):
+    step = 0
+    game = Game.Game(map)
+    Random_player = Players.RandomPlayer(game)
 
-#     while not game.win:
-#         action = Random_player.get_action(game)
-#         game.step(action)
-#         step += 1
+    while not game.win:
+        action = Random_player.get_action(game)
+        game.step(action)
+        step += 1
 
-#     print(f"episode {episodes} is done")
-#     print(step)
-#     counts.append(step)
+    print(f"episode {episodes} is done")
+    print(step)
+    Random_counts.append(step)
 
 
-# print(counts)
+print(Random_counts)
 
-################## Q table ############################
-
-counts = []
+################## Baseline Q table ############################
+Baseline_Q_counts = []
 game = Game.Game(map)
 Q_table_player = Players.QTablePlayer(game)
 
-for episodes in range(10):
+for episodes in range(100):
     step = 0
 
     while not game.win:
@@ -43,16 +43,79 @@ for episodes in range(10):
         Q_table_player.update_q_value(cur_game, action, reward, next_game)
         step += 1
 
-        # display last episode
-        if episodes == 9:
-            game.display()
-            print()
-            time.sleep(0.2)
+    print(f"episode {episodes} is done")
+    print(step)
+    Baseline_Q_counts.append(step)
+    game = Game.Game(map)
+
+print(Baseline_Q_counts)
+
+################## Cross Product Q table ############################
+
+Cross_Product_Q_counts = []
+game = Game.Game(map)
+Q_table_player = Players.CrossProductQTablePlayer(game)
+
+for episodes in range(100):
+    step = 0
+
+    while not game.win:
+        action = Q_table_player.get_action(game)
+        cur_game = copy.deepcopy(game)
+        reward = game.step(action)
+        next_game = game
+        Q_table_player.update_q_value(cur_game, action, reward, next_game)
+        step += 1
 
     print(f"episode {episodes} is done")
     print(step)
-    counts.append(step)
+    Cross_Product_Q_counts.append(step)
     game = Game.Game(map)
 
-print(counts)
+print(Cross_Product_Q_counts)
     
+################## CRM Q table ############################
+
+CRM_Q_counts = []
+game = Game.Game(map)
+Q_table_player = Players.CrossProductQTablePlayer(game)
+
+for episodes in range(100):
+    step = 0
+
+    while not game.win:
+        action = Q_table_player.get_action(game)
+        
+        # Iterate through all the reward states after step
+        for has_coffee in  [False, True]:
+            cur_game = copy.deepcopy(game)
+
+            # simluate reward with different position in reward machine
+            cur_game.has_coffee = has_coffee
+            
+            next_game = copy.deepcopy(cur_game)
+            reward = next_game.step(action)
+            
+            Q_table_player.update_q_value(cur_game, action, reward, next_game)
+
+        game.step(action)
+        step += 1
+
+    print(f"episode {episodes} is done")
+    print(step)
+    CRM_Q_counts.append(step)
+    game = Game.Game(map)
+
+print(CRM_Q_counts)
+    
+x = list(range(100))
+# plt.plot(x, Random_counts, label = "random")
+# plt.plot(x, Baseline_Q_counts, label = "baseline")
+plt.plot(x, Cross_Product_Q_counts, label = "cross product")
+plt.plot(x, CRM_Q_counts, label = "CRM")
+
+plt.xlabel("X-axis data")
+plt.ylabel("Y-axis data")
+plt.legend()
+plt.title('multiple plots')
+plt.show()
