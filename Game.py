@@ -47,6 +47,17 @@ Two_coffee_layout =       np.array([["@", "*", "*", "*", "m"],
 
 Two_coffee_map = Map(Two_coffee_layout, (0,0), (1,2))
 
+Easy_maze_layout = np.array([
+    ["@", "*", "*", "*", "*", "m"],
+    ["*", "#", "#", "o", "#", "*"],
+    ["*", "*", "c", "#", "#", "*"],
+    ["#", "*", "#", "#", "*", "*"],
+    ["c", "*", "*", "#", "*", "#"],
+    ["*", "#", "*", "*", "*", "*"]
+])
+
+Easy_maze_map = Map(Easy_maze_layout, starting_pos=(0,0), office_pos=(1,3))
+
 Maze_layout = np.array([
     ["@", "*", "*", "#", "*", "*", "*", "*", "#"],
     ["#", "#", "*", "#", "*", "#", "#", "*", "#"],
@@ -56,6 +67,7 @@ Maze_layout = np.array([
     ["#", "*", "#", "#", "#", "#", "*", "#", "*"],
     ["#", "*", "*", "*", "*", "m", "#", "o", "*"]
 ])
+
 Maze_map = Map(Maze_layout, starting_pos=(0,0), office_pos=(6,7))
 
 class Game:
@@ -89,10 +101,10 @@ class Game:
 
         if new_pos[0] < 0 or new_pos[0] >= self.map.H or new_pos[1] < 0 or new_pos[1] >= self.map.W:
             # Out of bound, nothing happens
-            return -10
+            return -1
         elif self.map.layout[new_pos] == "#":
             # Hit a wall, nothing happens
-            return -10
+            return -1
         else:
             reward = 0
             
@@ -112,8 +124,7 @@ class Game:
                 self.win = True
                 reward = 5
             else:
-                reward = -0.1
-
+                reward = -1
             
             
             self.map.layout[new_pos] = "@"
